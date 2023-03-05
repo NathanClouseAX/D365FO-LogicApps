@@ -12,7 +12,7 @@ First, go to [https://portal.azure.com](https://portal.azure.com/).
 
 Next, search for Service Bus.
 
-[![](/sites/default/files/2023-01-21_21-09-23.png)](/sites/default/files/2023-01-21_21-09-23.png)
+[![](sites/default/files/2023-01-21_21-09-23.png)](sites/default/files/2023-01-21_21-09-23.png)
 
 Next, click on create.
 
