@@ -65,6 +65,5 @@ Your queue should look like this.
 
 [![](sites/default/files/2023-01-26_21-31-12.png)](sites/default/files/2023-01-26_21-31-12.png)
 
-Next, go to the [Key vault and create a secret for the service bus connection](https://www.atomicax.com/article/how-create-azure-key-vault-fo) string (Data Point 4).
 
 step 2: https://learn.microsoft.com/en-us/azure/connectors/connectors-create-api-servicebus?tabs=consumption#step-1---check-access-to-service-bus-namespace
