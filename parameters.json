@@ -1,0 +1,150 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vulnerabilityAssessments_Default_storageContainerPath": {
+            "value": null
+        },
+        "workflows_order_name": {
+            "value": null
+        },
+        "connections_teams_name": {
+            "value": null
+        },
+        "connections_teams_1_name": {
+            "value": null
+        },
+        "workflows_customer_name": {
+            "value": null
+        },
+        "workflows_ax2d365fo_name": {
+            "value": null
+        },
+        "connections_azureblob_name": {
+            "value": null
+        },
+        "connections_office365_name": {
+            "value": null
+        },
+        "workflows_itemcreate_name": {
+            "value": null
+        },
+        "workflows_logic_7643_name": {
+            "value": null
+        },
+        "workflows_logic_7644_name": {
+            "value": null
+        },
+        "workflows_logic_7645_name": {
+            "value": null
+        },
+        "workflows_logic_7646_name": {
+            "value": null
+        },
+        "workflows_logic_7647_name": {
+            "value": null
+        },
+        "workflows_logic_7649_name": {
+            "value": null
+        },
+        "workflows_logic_7650_name": {
+            "value": null
+        },
+        "workflows_logic_7651_name": {
+            "value": null
+        },
+        "workflows_logic_7667_name": {
+            "value": null
+        },
+        "connections_dynamicsax_name": {
+            "value": null
+        },
+        "connections_servicebus_name": {
+            "value": null
+        },
+        "workflows_blob2finops_name": {
+            "value": null
+        },
+        "connections_azureblob_1_name": {
+            "value": null
+        },
+        "connections_office365_1_name": {
+            "value": null
+        },
+        "workflows_logic_7646_a_name": {
+            "value": null
+        },
+        "workflows_logic_7646_b_name": {
+            "value": null
+        },
+        "connections_dynamicsax_1_name": {
+            "value": null
+        },
+        "connections_dynamicsax_2_name": {
+            "value": null
+        },
+        "connections_servicebus_1_name": {
+            "value": null
+        },
+        "workflows_PowerLCS_Auth_name": {
+            "value": null
+        },
+        "workflows_d365_teams_http_name": {
+            "value": null
+        },
+        "workflows_recurringapitest_name": {
+            "value": null
+        },
+        "connections_azuredatafactory_name": {
+            "value": null
+        },
+        "workspaces_envsynapsedemo_name": {
+            "value": null
+        },
+        "connections_commondataservice_name": {
+            "value": null
+        },
+        "connections_commondataservice_1_name": {
+            "value": null
+        },
+        "vaults_demo1_NathanClouseAX_name": {
+            "value": null
+        },
+        "namespaces_envistasalesbus_name": {
+            "value": null
+        },
+        "virtualMachines_DrupalCommerce_name": {
+            "value": null
+        },
+        "vaults_envista_sales_demo_key_name": {
+            "value": null
+        },
+        "namespaces_demo1_servicebus_name": {
+            "value": null
+        },
+        "virtualNetworks_tech_sales_rg_vnet_name": {
+            "value": null
+        },
+        "publicIPAddresses_DrupalCommerce_ip_name": {
+            "value": null
+        },
+        "networkInterfaces_drupalcommerce9_z1_name": {
+            "value": null
+        },
+        "networkSecurityGroups_DrupalCommerce_nsg_name": {
+            "value": null
+        },
+        "storageAccounts_envistasalesdemodatalake_name": {
+            "value": null
+        },
+        "workflows_PowerLCS_HandleLCSOperationCreate_name": {
+            "value": null
+        },
+        "userAssignedIdentities_RestAPITest1_name": {
+            "value": null
+        },
+        "connections_office365_externalid": {
+            "value": null
+        }
+    }
+}
