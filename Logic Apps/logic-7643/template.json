@@ -1,0 +1,267 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workflows_logic_7643_name": {
+            "defaultValue": "logic-7643",
+            "type": "String"
+        },
+        "connections_office365_externalid": {
+            "defaultValue": "/subscriptions/5e1bf234-0efb-4cbd-b09b-44a56ce557b3/resourceGroups/finance-integrations-rg/providers/Microsoft.Web/connections/office365",
+            "type": "String"
+        },
+        "connections_servicebus_1_externalid": {
+            "defaultValue": "/subscriptions/5e1bf234-0efb-4cbd-b09b-44a56ce557b3/resourceGroups/tech_sales_rg/providers/Microsoft.Web/connections/servicebus-1",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('workflows_logic_7643_name')]",
+            "location": "eastus",
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        },
+                        "FO Endpoint": {
+                            "defaultValue": "https://envista-sales-demo.sandbox.operations.dynamics.com",
+                            "type": "String"
+                        }
+                    },
+                    "triggers": {
+                        "When_a_message_is_received_in_a_queue_(peek-lock)": {
+                            "recurrence": {
+                                "frequency": "Minute",
+                                "interval": 3
+                            },
+                            "evaluatedRecurrence": {
+                                "frequency": "Minute",
+                                "interval": 3
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['servicebus_1']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "path": "/@{encodeURIComponent(encodeURIComponent('7643'))}/messages/head/peek",
+                                "queries": {
+                                    "queueType": "Main",
+                                    "sessionId": "None"
+                                }
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Complete_the_message_in_a_queue": {
+                            "runAfter": {
+                                "Send_an_email_(V2)": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['servicebus_1']['connectionId']"
+                                    }
+                                },
+                                "method": "delete",
+                                "path": "/@{encodeURIComponent(encodeURIComponent('7643'))}/messages/complete",
+                                "queries": {
+                                    "lockToken": "@triggerBody()?['LockToken']",
+                                    "queueType": "Main"
+                                }
+                            }
+                        },
+                        "Get_PurchaseOrderHeadersV2": {
+                            "runAfter": {
+                                "Parse_JSON": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Http",
+                            "inputs": {
+                                "authentication": {
+                                    "audience": "@parameters('FO Endpoint')",
+                                    "clientId": "134573a2-4e29-486b-9f0a-708b7b2eb5c8",
+                                    "secret": "NiP8Q~NwGZOyMNBWCSPS.nxykFeAHxwr2bI1zalR",
+                                    "tenant": "9d2a793f-db8c-4949-820c-34e31d66b3cd",
+                                    "type": "ActiveDirectoryOAuth"
+                                },
+                                "method": "GET",
+                                "queries": {
+                                    "cross-company": "true"
+                                },
+                                "uri": "@{parameters('FO Endpoint')}/data/PurchaseOrderHeadersV2(dataAreaId='@{body('Parse_JSON')?['LegalEntity']}',PurchaseOrderNumber='@{body('Parse_JSON')?['PurchaseOrderNumber']}')"
+                            }
+                        },
+                        "Get_PurchaseOrderLinesV2": {
+                            "runAfter": {
+                                "Get_PurchaseOrderHeadersV2": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Http",
+                            "inputs": {
+                                "authentication": {
+                                    "audience": "@parameters('FO Endpoint')",
+                                    "clientId": "134573a2-4e29-486b-9f0a-708b7b2eb5c8",
+                                    "secret": "NiP8Q~NwGZOyMNBWCSPS.nxykFeAHxwr2bI1zalR",
+                                    "tenant": "9d2a793f-db8c-4949-820c-34e31d66b3cd",
+                                    "type": "ActiveDirectoryOAuth"
+                                },
+                                "method": "GET",
+                                "queries": {
+                                    "$filter": "dataAreaId eq '@{body('Parse_JSON')?['LegalEntity']}' and PurchaseOrderNumber eq '@{body('Parse_JSON')?['PurchaseOrderNumber']}'",
+                                    "cross-company": "true"
+                                },
+                                "uri": "@{parameters('FO Endpoint')}/data/PurchaseOrderLinesV2"
+                            }
+                        },
+                        "Parse_JSON": {
+                            "runAfter": {},
+                            "type": "ParseJson",
+                            "inputs": {
+                                "content": "@decodeBase64(triggerBody()?['ContentData'])",
+                                "schema": {
+                                    "properties": {
+                                        "BusinessEventId": {
+                                            "type": "string"
+                                        },
+                                        "BusinessEventLegalEntity": {
+                                            "type": "string"
+                                        },
+                                        "ContextRecordSubject": {
+                                            "type": "string"
+                                        },
+                                        "ControlNumber": {
+                                            "type": "integer"
+                                        },
+                                        "EventId": {
+                                            "type": "string"
+                                        },
+                                        "EventTime": {
+                                            "type": "string"
+                                        },
+                                        "EventTimeIso8601": {
+                                            "type": "string"
+                                        },
+                                        "InitiatingUserAADObjectId": {
+                                            "type": "string"
+                                        },
+                                        "LegalEntity": {
+                                            "type": "string"
+                                        },
+                                        "MajorVersion": {
+                                            "type": "integer"
+                                        },
+                                        "MinorVersion": {
+                                            "type": "integer"
+                                        },
+                                        "ParentContextRecordSubjects": {},
+                                        "PurchaseJournal": {
+                                            "type": "string"
+                                        },
+                                        "PurchaseOrderDate": {
+                                            "type": "string"
+                                        },
+                                        "PurchaseOrderNumber": {
+                                            "type": "string"
+                                        },
+                                        "PurchaseType": {
+                                            "type": "string"
+                                        },
+                                        "TransactionCurrencyAmount": {
+                                            "type": "number"
+                                        },
+                                        "TransactionCurrencyCode": {
+                                            "type": "string"
+                                        },
+                                        "VendorAccount": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "Send_an_email_(V2)": {
+                            "runAfter": {
+                                "Get_PurchaseOrderLinesV2": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": {
+                                    "Attachments": [
+                                        {
+                                            "ContentBytes": "@{base64(body('Get_PurchaseOrderHeadersV2'))}",
+                                            "Name": "PurchaseOrderHeadersV2-@{body('Parse_JSON')?['PurchaseOrderNumber']}.json"
+                                        },
+                                        {
+                                            "ContentBytes": "@{base64(body('Get_PurchaseOrderLinesV2'))}",
+                                            "Name": "PurchaseOrderLinesV2-@{body('Parse_JSON')?['PurchaseOrderNumber']}.json"
+                                        }
+                                    ],
+                                    "Body": "<p>Attached are the header and lines JSON for a Purchase Order.</p>",
+                                    "Cc": "gkaspar@envistacorp.com",
+                                    "Importance": "Normal",
+                                    "Subject": "[concat(parameters('workflows_logic_7643_name'), ' result')]",
+                                    "To": "nclouse@envistacorp.com"
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['office365']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/v2/Mail"
+                            }
+                        },
+                        "Terminate": {
+                            "runAfter": {
+                                "Complete_the_message_in_a_queue": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Terminate",
+                            "inputs": {
+                                "runStatus": "Succeeded"
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "office365": {
+                                "connectionId": "[parameters('connections_office365_externalid')]",
+                                "connectionName": "office365",
+                                "id": "/subscriptions/5e1bf234-0efb-4cbd-b09b-44a56ce557b3/providers/Microsoft.Web/locations/eastus/managedApis/office365"
+                            },
+                            "servicebus_1": {
+                                "connectionId": "[parameters('connections_servicebus_1_externalid')]",
+                                "connectionName": "servicebus-1",
+                                "id": "/subscriptions/5e1bf234-0efb-4cbd-b09b-44a56ce557b3/providers/Microsoft.Web/locations/eastus/managedApis/servicebus"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

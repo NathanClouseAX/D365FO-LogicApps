@@ -1,0 +1,163 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workflows_logic_7646_name": {
+            "defaultValue": "logic-7646",
+            "type": "String"
+        },
+        "connections_servicebus_1_externalid": {
+            "defaultValue": "/subscriptions/5e1bf234-0efb-4cbd-b09b-44a56ce557b3/resourceGroups/tech_sales_rg/providers/Microsoft.Web/connections/servicebus-1",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('workflows_logic_7646_name')]",
+            "location": "eastus",
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "When_a_message_is_received_in_a_queue_(auto-complete)": {
+                            "recurrence": {
+                                "frequency": "Minute",
+                                "interval": 3
+                            },
+                            "evaluatedRecurrence": {
+                                "frequency": "Minute",
+                                "interval": 3
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['servicebus_1']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "path": "/@{encodeURIComponent(encodeURIComponent('7646'))}/messages/head",
+                                "queries": {
+                                    "queueType": "Main"
+                                }
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Initialize_variable": {
+                            "runAfter": {},
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "customProperties",
+                                        "type": "object",
+                                        "value": "@triggerBody()?['Properties']"
+                                    }
+                                ]
+                            }
+                        },
+                        "Parse_JSON": {
+                            "runAfter": {
+                                "Initialize_variable": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ParseJson",
+                            "inputs": {
+                                "content": "@decodeBase64(triggerBody()?['ContentData'])",
+                                "schema": {
+                                    "properties": {
+                                        "key": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "Switch": {
+                            "runAfter": {
+                                "Parse_JSON": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "cases": {
+                                "Case_A": {
+                                    "case": "A",
+                                    "actions": {
+                                        "logic-7646-a": {
+                                            "runAfter": {},
+                                            "type": "Workflow",
+                                            "inputs": {
+                                                "host": {
+                                                    "triggerName": "manual",
+                                                    "workflow": {
+                                                        "id": "[concat(resourceId('Microsoft.Logic/workflows', parameters('workflows_logic_7646_name')), '-a')]"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "Case_B": {
+                                    "case": "B",
+                                    "actions": {
+                                        "logic-7646-b": {
+                                            "runAfter": {},
+                                            "type": "Workflow",
+                                            "inputs": {
+                                                "host": {
+                                                    "triggerName": "manual",
+                                                    "workflow": {
+                                                        "id": "[concat(resourceId('Microsoft.Logic/workflows', parameters('workflows_logic_7646_name')), '-b')]"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "default": {
+                                "actions": {
+                                    "Failed": {
+                                        "runAfter": {},
+                                        "type": "Terminate",
+                                        "inputs": {
+                                            "runStatus": "Failed"
+                                        }
+                                    }
+                                }
+                            },
+                            "expression": "@body('Parse_JSON')?['key']",
+                            "type": "Switch"
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "servicebus_1": {
+                                "connectionId": "[parameters('connections_servicebus_1_externalid')]",
+                                "connectionName": "servicebus-1",
+                                "id": "/subscriptions/5e1bf234-0efb-4cbd-b09b-44a56ce557b3/providers/Microsoft.Web/locations/eastus/managedApis/servicebus"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
